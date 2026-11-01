@@ -1,16 +1,51 @@
+// src/components/PriceFilter.tsx
 import React from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { PriceRange } from "../utils/filters";
-import { TodoBox } from "./TodoBox";
+import { colors, radius } from "../theme";
 
 interface Props {
   value: PriceRange;
-  onChange: (v: PriceRange) => void;
+  onChange: (val: PriceRange) => void;
 }
 
-// THỬ THÁCH: 3 nút lọc khoảng giá (bấm lần nữa để bỏ chọn)
+const PRICE_RANGES: { key: PriceRange; label: string }[] = [
+  { key: "lt100", label: "Dưới 100k" },
+  { key: "100to300", label: "100k–300k" },
+  { key: "gt300", label: "Trên 300k" },
+];
+
 export function PriceFilter({ value, onChange }: Props) {
-  // TODO BT7.C2: render 3 nút từ PRICE_RANGES (import từ utils/filters); nút đang chọn có nền cyan (colors.cyan)
-  //   active = value === r.key · onPress = onChange(active ? null : r.key)   (mẫu: xem CategoryChips)
-  void value; void onChange;
-  return <TodoBox id="BT7.C2">Thử thách: 3 nút lọc giá — Dưới 100k / 100k–300k / Trên 300k.</TodoBox>;
+  return (
+    <View style={styles.container}>
+      {PRICE_RANGES.map((r) => {
+        const active = value === r.key;
+        return (
+          <Pressable
+            key={r.key}
+            // Bấm lại nút đang active thì hủy chọn (về null)
+            onPress={() => onChange(active ? null : r.key)}
+            style={[styles.btn, active && styles.btnActive]}
+          >
+            <Text style={[styles.text, active && styles.textActive]}>{r.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 6 },
+  btn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: "#fff",
+  },
+  btnActive: { backgroundColor: colors.cyan, borderColor: colors.cyan },
+  text: { fontSize: 13, color: colors.muted, fontWeight: "600" },
+  textActive: { color: "#fff" },
+});

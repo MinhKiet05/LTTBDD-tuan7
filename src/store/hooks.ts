@@ -1,5 +1,3 @@
-// ADAPTER: component chỉ gọi useCart() / useAuth() / useWishlist().
-// Nếu sau này đổi sang Recoil/Zustand, chỉ sửa file này — UI không phải sửa.
 import { useCallback, useMemo } from "react";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "./index";
@@ -11,7 +9,6 @@ import { CartItem, User } from "../types";
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// src/store/hooks.ts (tìm đến hàm useCart)
 export function useCart() {
   const dispatch = useAppDispatch();
   const items = useAppSelector((s) => s.cart.items);
@@ -41,16 +38,18 @@ export function useCart() {
 
 export function useAuth() {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((s) => s.auth.user);
-  const token = useAppSelector((s) => s.auth.token);
+  const { user, token } = useAppSelector((s) => s.auth);
+
+  // TODO BT7.4b: Đăng nhập thành công khi có CẢ token và user
+  const isLoggedIn = !!token && !!user;
 
   return {
     user,
     token,
-    isLoggedIn: false, // TODO BT7.4b: true khi có cả token lẫn user  →  !!token && !!user
-    signIn: useCallback((u: User, t: string) => dispatch(setCredentials({ user: u, token: t })), [dispatch]),
-    signOut: useCallback(() => dispatch(logout()), [dispatch]),
-    patchUser: useCallback((p: Partial<User>) => dispatch(updateUser(p)), [dispatch]),
+    isLoggedIn,
+    signIn: (user: User, token: string) => dispatch(setCredentials({ user, token })),
+    signOut: () => dispatch(logout()),
+    update: (patch: Partial<User>) => dispatch(updateUser(patch)),
   };
 }
 

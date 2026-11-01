@@ -1,24 +1,29 @@
+// src/store/wishlistSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface WishlistState {
   ids: number[];
 }
-const initialState: WishlistState = { ids: [] };
 
-// THỬ THÁCH (BT7.C1) — dùng lại ở buổi sau
-const wishlistSlice = createSlice({
+const initialState: WishlistState = {
+  ids: [],
+};
+
+export const wishlistSlice = createSlice({
   name: "wishlist",
   initialState,
   reducers: {
-    // TODO BT7.C1 (thử thách): nếu id đã có trong state.ids thì bỏ ra, chưa có thì thêm vào
+    // BT7.C1: Thêm hoặc xóa bookId khỏi mảng yêu thích
     toggleWishlist(state, action: PayloadAction<number>) {
-      void state; void action;
-    },
-    hydrateWishlist(state, action: PayloadAction<number[]>) {
-      state.ids = action.payload;
+      const idx = state.ids.indexOf(action.payload);
+      if (idx >= 0) {
+        state.ids.splice(idx, 1);
+      } else {
+        state.ids.push(action.payload);
+      }
     },
   },
 });
 
-export const { toggleWishlist, hydrateWishlist } = wishlistSlice.actions;
+export const { toggleWishlist } = wishlistSlice.actions;
 export default wishlistSlice.reducer;

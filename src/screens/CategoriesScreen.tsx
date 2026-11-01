@@ -1,34 +1,60 @@
-import React from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { Header } from "../components/Header";
-import { TodoBox } from "../components/TodoBox";
-import { MOCK_CATEGORIES } from "../data/mockBooks";
-// import { LoadingView } from "../components/LoadingView";
-// import { ErrorView } from "../components/ErrorView";
-// import { getCategories } from "../services/categoryService";
-// import { getErrorMessage } from "../api/client";
-import { TabScreenProps } from "../navigation/types";
+// src/screens/CategoriesScreen.tsx
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import { getCategories } from "../services/categoryService";
+import { getErrorMessage } from "../api/client";
+import { LoadingView } from "../components/LoadingView";
+import { ErrorView } from "../components/ErrorView";
 import { Category } from "../types";
+import { TabScreenProps } from "../navigation/types";
 import { colors, radius } from "../theme";
 
-// danh mục lấy từ API; nhấn → về Home kèm categoryId (Home tự lọc)
 export function CategoriesScreen({ navigation }: TabScreenProps<"Categories">) {
-  // TODO BT7.6b: state data / loading / error + load() gọi getCategories() trong useEffect — giống Home
-  // TODO BT7.6c: loading → <LoadingView/>, error → <ErrorView onRetry={load}/>
-  const data: Category[] = MOCK_CATEGORIES;
-  void navigation;
+  // TODO BT7.6b: State quản lý danh mục và trạng thái tải
+  const [data, setData] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // TODO BT7.6b: Hàm load gọi API getCategories
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const categories = await getCategories();
+      setData(categories);
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // TODO BT7.6c: Xử lý 3 trạng thái: loading, error (kèm onRetry)
+  if (loading) {
+    return <LoadingView label="Đang tải danh mục..." />;
+  }
+
+  if (error) {
+    return <ErrorView message={error} onRetry={load} />;
+  }
 
   return (
     <View style={styles.container}>
-      <Header title="🗂️ Danh mục" />
       <FlatList
         data={data}
-        keyExtractor={(c) => String(c.id)}
-        contentContainerStyle={{ padding: 12, gap: 10 }}
-        ListHeaderComponent={<TodoBox id="BT7.6b">Danh mục đang là dữ liệu GIẢ — nối API /categories.</TodoBox>}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          // TODO BT7.8c: onPress → navigation.navigate("Home", { categoryId: item.id })
-          <Pressable style={styles.row} onPress={() => {}}>
+          // src/screens/CategoriesScreen.tsx
+          // TODO BT7.8c: Bấm danh mục chuyển về tab Home kèm tham số categoryId
+          <Pressable
+            style={styles.row}
+            onPress={() => navigation.navigate("Home", { categoryId: item.id })}
+          >
             <Text style={styles.emoji}>{item.emoji}</Text>
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.arrow}>›</Text>
@@ -41,8 +67,17 @@ export function CategoriesScreen({ navigation }: TabScreenProps<"Categories">) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  row: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", padding: 16, borderRadius: radius.md, gap: 12 },
-  emoji: { fontSize: 26 },
-  name: { flex: 1, fontSize: 16, fontWeight: "700", color: colors.text },
-  arrow: { fontSize: 22, color: colors.muted },
+  list: { padding: 16, gap: 12 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: radius.md,
+    gap: 12,
+  },
+  emoji: { fontSize: 24 },
+  name: { flex: 1, fontSize: 16, fontWeight: "600", color: colors.text },
+  arrow: { fontSize: 20, color: colors.muted },
 });
