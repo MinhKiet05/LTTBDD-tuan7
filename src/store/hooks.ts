@@ -11,22 +11,31 @@ import { CartItem, User } from "../types";
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
+// src/store/hooks.ts (tìm đến hàm useCart)
 export function useCart() {
   const dispatch = useAppDispatch();
   const items = useAppSelector((s) => s.cart.items);
 
-  // TODO BT7.3b: totalQuantity = tổng quantity · totalPrice = tổng price * quantity (dùng reduce; useMemo theo [items])
-  const totalQuantity = useMemo(() => 0 * items.length, [items]);
-  const totalPrice = useMemo(() => 0 * items.length, [items]);
+  // TODO BT7.3b: Tính tổng số lượng và tổng thành tiền
+  const totalQuantity = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    [items]
+  );
+
+  const totalPrice = useMemo(
+    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [items]
+  );
 
   return {
     items,
     totalQuantity,
     totalPrice,
-    add: useCallback((book: Omit<CartItem, "quantity">) => dispatch(addItem(book)), [dispatch]),
-    remove: useCallback((bookId: number) => dispatch(removeItem(bookId)), [dispatch]),
-    setQty: useCallback((bookId: number, quantity: number) => dispatch(setQuantity({ bookId, quantity })), [dispatch]),
-    clear: useCallback(() => dispatch(clearCart()), [dispatch]),
+    add: (item: Omit<CartItem, "quantity">) => dispatch(addItem(item)),
+    remove: (bookId: number) => dispatch(removeItem(bookId)),
+    setQty: (bookId: number, quantity: number) =>
+      dispatch(setQuantity({ bookId, quantity })),
+    clear: () => dispatch(clearCart()),
   };
 }
 

@@ -11,10 +11,9 @@ import { colors, formatPrice, radius } from "../theme";
 // đọc giỏ hàng từ store (không còn mock cứng); nút Thanh toán → Checkout
 export function CartScreen({ navigation }: TabScreenProps<"Cart">) {
   // TODO BT7.3f: đọc { items, totalPrice } từ useCart() (store Redux) — hiện đang để giỏ rỗng
-  const items: CartItem[] = [];
-  const totalPrice = 0;
-  void useCart;
-
+  
+  const { items, totalPrice, remove, setQty } = useCart();
+  
   return (
     <View style={styles.container}>
       <Header title="🛒 Giỏ hàng" />
@@ -23,18 +22,22 @@ export function CartScreen({ navigation }: TabScreenProps<"Cart">) {
         keyExtractor={(i) => String(i.bookId)}
         renderItem={({ item }) => <CartItemRow item={item} />}
         contentContainerStyle={{ paddingVertical: 8, flexGrow: 1 }}
-        ListEmptyComponent={<TodoBox id="BT7.3f">Giỏ hàng rỗng vì chưa đọc store. Hoàn thành BT7.3a–3f.</TodoBox>}
+        ListEmptyComponent={
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>Giỏ hàng đang trống</Text>
+    </View>
+  }
       />
       <View style={styles.footer}>
         <Text style={styles.total}>Tổng cộng: {formatPrice(totalPrice)}</Text>
         <Pressable
-          style={[styles.btn, items.length === 0 && styles.btnDisabled]}
-          disabled={items.length === 0}
-          // TODO BT7.2b: navigation.navigate("Checkout", { total: totalPrice })
-          onPress={() => void navigation}
-        >
-          <Text style={styles.btnText}>Thanh toán</Text>
-        </Pressable>
+  disabled={items.length === 0}
+  style={[styles.checkoutBtn, items.length === 0 && styles.checkoutBtnDisabled]}
+  // TODO BT7.2b: Điều hướng sang Checkout kèm tham số total
+  onPress={() => navigation.navigate("Checkout", { total: totalPrice })}
+>
+  <Text style={styles.checkoutBtnText}>Thanh toán</Text>
+</Pressable>
       </View>
     </View>
   );
@@ -48,4 +51,5 @@ const styles = StyleSheet.create({
   btn: { backgroundColor: colors.indigo, padding: 14, borderRadius: radius.md, alignItems: "center" },
   btnDisabled: { opacity: 0.4 },
   btnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
+  checkoutBtnText:{backgroundColor:"#bdbbbb", alignContent:"center", textAlign:"center", height:40}
 });

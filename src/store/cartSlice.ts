@@ -1,39 +1,51 @@
+// src/store/cartSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CartItem } from "../types";
+
+const clamp = (q: number, stock: number) => Math.max(1, Math.min(q, stock));
 
 interface CartState {
   items: CartItem[];
 }
-const initialState: CartState = { items: [] };
 
-const clamp = (q: number, stock: number) => Math.max(1, Math.min(q, stock));
+const initialState: CartState = {
+  items: [],
+};
 
-const cartSlice = createSlice({
+export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // TODO BT7.3a: addItem — nếu bookId đã có thì tăng quantity (clamp ≤ stock), chưa có thì push { ...payload, quantity: 1 }
+    // TODO BT7.3a: addItem
+    // Đã có bookId -> tăng quantity (không vượt quá stock); chưa có -> thêm mới với quantity = 1
     addItem(state, action: PayloadAction<Omit<CartItem, "quantity">>) {
-      void state; void action; void clamp;
+      const found = state.items.find((i) => i.bookId === action.payload.bookId);
+      if (found) {
+        found.quantity = clamp(found.quantity + 1, found.stock);
+      } else {
+        state.items.push({ ...action.payload, quantity: 1 });
+      }
     },
-    // TODO BT7.3a: removeItem — lọc bỏ item có bookId === payload
+
+    // TODO BT7.3a: removeItem - Lọc bỏ item có bookId trùng khớp
     removeItem(state, action: PayloadAction<number>) {
-      void state; void action;
+      state.items = state.items.filter((i) => i.bookId !== action.payload);
     },
-    // TODO BT7.3a: setQuantity — tìm item, gán quantity = clamp(payload.quantity, item.stock)
+
+    // TODO BT7.3a: setQuantity - Tìm item và cập nhật số lượng hợp lệ (từ 1 đến stock)
     setQuantity(state, action: PayloadAction<{ bookId: number; quantity: number }>) {
-      void state; void action;
+      const found = state.items.find((i) => i.bookId === action.payload.bookId);
+      if (found) {
+        found.quantity = clamp(action.payload.quantity, found.stock);
+      }
     },
-    // TODO BT7.3a: clearCart — state.items = []
+
+    // TODO BT7.3a: clearCart - Xóa toàn bộ giỏ hàng
     clearCart(state) {
-      void state;
-    },
-    // Dùng ở buổi sau: nạp lại giỏ hàng đã lưu trong AsyncStorage
-    hydrateCart(state, action: PayloadAction<CartItem[]>) {
-      state.items = action.payload;
+      state.items = [];
     },
   },
 });
 
-export const { addItem, removeItem, setQuantity, clearCart, hydrateCart } = cartSlice.actions;
+export const { addItem, removeItem, setQuantity, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

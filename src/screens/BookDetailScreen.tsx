@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { TodoBox } from "../components/TodoBox";
 import { MOCK_BOOKS } from "../data/mockBooks";
+
 // import { LoadingView } from "../components/LoadingView";
 // import { ErrorView } from "../components/ErrorView";
 // import { getBookById } from "../services/bookService";
@@ -33,9 +34,22 @@ export function BookDetailScreen({ route }: RootScreenProps<"BookDetail">) {
       <Text style={styles.stock}>Còn {book.stock} cuốn</Text>
       <Text style={styles.desc}>{book.description}</Text>
       {/* TODO BT7.3c: nút "Thêm vào giỏ" → add({ bookId, title, price, emoji, color, stock }) từ book */}
-      <Pressable style={styles.btn} onPress={() => void add}>
-        <Text style={styles.btnText}>Thêm vào giỏ</Text>
-      </Pressable>
+      <Pressable
+    style={styles.btn}
+    onPress={() => {
+      if (!book) return;
+      add({
+        bookId: book.id,
+        title: book.title,
+        price: book.price,
+        emoji: book.emoji,
+        color: book.color,
+        stock: book.stock,
+      });
+    }}
+  >
+    <Text style={styles.btnText}>Thêm vào giỏ</Text>
+  </Pressable>
     </ScrollView>
   );
 }

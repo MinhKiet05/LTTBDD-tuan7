@@ -2,11 +2,11 @@ import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { TabBar, TabItem } from "../components/TabBar";
 import { useCart } from "../store/hooks"; // Sử dụng hook useCart để lấy tổng số lượng giỏ hàng cho badge
 
-const EMOJI: Record<string, string> = { 
-  Home: "🏠", 
-  Categories: "🗂️", 
-  Cart: "🛒", 
-  Account: "👤" 
+const EMOJI: Record<string, string> = {
+  Home: "🏠",
+  Categories: "🗂️",
+  Cart: "🛒",
+  Account: "👤"
 };
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -18,6 +18,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     key: route.key,
     label: descriptors[route.key].options.title ?? route.name,
     emoji: EMOJI[route.name] ?? "•",
+    // TODO BT7.3e: Hiện badge nếu là tab Cart và giỏ hàng có đồ
     badge: route.name === "Cart" && totalQuantity > 0 ? totalQuantity : undefined,
   }));
 

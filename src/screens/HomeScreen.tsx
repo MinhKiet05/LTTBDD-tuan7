@@ -19,10 +19,10 @@ import { MOCK_BOOKS, MOCK_CATEGORIES } from "../data/mockBooks"; // ← dữ li�
 import { PriceRange } from "../utils/filters";
 import { TabScreenProps } from "../navigation/types";
 import { colors } from "../theme";
-
+import { useCart } from "../store/hooks";
 export function HomeScreen({ navigation }: TabScreenProps<"Home">) {
   // TODO BT7.3d: lấy { totalQuantity } từ useCart() và truyền vào <FloatingCartButton count=... />
-
+  const { totalQuantity } = useCart();
   // TODO BT7.5b: thay dữ liệu giả bằng state: books, categories, loading, error  (useState)
   //   rồi viết hàm load() gọi SONG SONG: const [b, c] = await Promise.all([getBooks(), getCategories()])
   //   gọi load() trong useEffect(…, []) — nhớ try/catch/finally.
@@ -59,17 +59,13 @@ export function HomeScreen({ navigation }: TabScreenProps<"Home">) {
       )}
       <BookGrid
         data={visibleBooks}
-        // TODO BT7.2a: onPressBook → navigation.navigate("BookDetail", { bookId: b.id })
-        onPressBook={() => {}}
-        ListHeaderComponent={
-          <View>
-            <CategoryChips categories={categories} selectedId={categoryId} onSelect={setCategoryId} />
-            <PriceFilter value={priceRange} onChange={setPriceRange} />
-            <TodoBox id="BT7.5b">Màn Home đang dùng dữ liệu GIẢ (mockBooks). Hãy nối API json-server.</TodoBox>
-          </View>
-        }
+        // TODO BT7.2a: Điều hướng sang BookDetail kèm tham số bookId
+        onPressBook={(b) => navigation.navigate("BookDetail", { bookId: b.id })}
       />
-      <FloatingCartButton count={0} onPress={() => navigation.navigate("Cart")} />
+      <FloatingCartButton
+        count={totalQuantity}
+        onPress={() => navigation.navigate("Cart")}
+      />
     </View>
   );
 }
